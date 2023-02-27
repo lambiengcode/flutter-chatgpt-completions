@@ -48,6 +48,7 @@ String? responseWithoutStream =
     topP: 1,
     n: 1,
     stream: false,
+    maxTokens: 2048,
 ));
 
 print("OpenAI: $responseWithoutStream");
@@ -66,6 +67,7 @@ await ChatGPTCompletions.instance.textCompletions(
       topP: 1,
       n: 1,
       stream: true, // --> set this is true
+      maxTokens: 2048,
     ),
     onStreamValue: (characters) {
       responseWithStream += characters;

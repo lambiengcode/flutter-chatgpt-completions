@@ -6,7 +6,7 @@ import 'package:chatgpt_completions/chatgpt_completions.dart';
 
 void main() async {
   /// Generate api key from openai console: https://platform.openai.com/account/api-keys
-  ChatGPTCompletions.instance.initialize(apiKey: "api_key_here");
+  ChatGPTCompletions.instance.initialize(apiKey: 'openai_api_key');
 
   print("Generating answer without stream...");
 
@@ -15,15 +15,13 @@ void main() async {
       await ChatGPTCompletions.instance.textCompletions(TextCompletionsParams(
     prompt: "What's Flutter?",
     model: GPTModel.davinci,
-    temperature: 0.2,
-    topP: 1,
-    n: 1,
     stream: false,
   ));
 
   print("OpenAI: $responseWithoutStream");
 
-  print("-> Generating answer with stream...");
+  print("\n\n-> Generating answer with stream...");
+  await Future.delayed(const Duration(seconds: 2));
 
   // Text completions with stream response (stream: true)
   String responseWithStream = "";
@@ -37,10 +35,6 @@ void main() async {
     TextCompletionsParams(
       prompt: "What's Flutter?",
       model: GPTModel.davinci,
-      temperature: 0.2,
-      topP: 1,
-      n: 1,
-      stream: true, // --> set this is true
     ),
     onStreamValue: (characters) {
       responseWithStream += characters;

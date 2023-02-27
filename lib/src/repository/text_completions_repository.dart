@@ -46,45 +46,52 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
     Function(String p1)? onStreamValue,
     Function(StreamSubscription? p1)? onStreamCreated,
   }) async {
-    try {
-      String responseText = '';
+    String responseText = '';
 
-      if (params.stream) {
-        final Response<ResponseBody> response = await openAIClient.post(
-          Endpoints.textCompletions,
-          data: params.toMap(),
-          options: getOptions(apiKey, responseType: ResponseType.stream),
+    if (params.stream) {
+      final Response<ResponseBody> response = await openAIClient.post(
+        Endpoints.textCompletions,
+        data: params.toMap(),
+        options: getOptions(apiKey, responseType: ResponseType.stream),
+      );
+
+      final StreamSubscription? responseStream = response.data?.stream.listen(
+        (event) {
+          final String data = utf8.decode(event);
+
+          if (data.startsWith('data: {')) {
+            final Map dataJson = jsonDecode(data.replaceAll('data: ', ''));
+            responseText += dataJson['choices'][0]['text'].toString();
+            onStreamValue?.call(responseText);
+          } else if (!data.startsWith('data:')) {
+            final Map errorJson = jsonDecode(data);
+            throw Exception(
+              "status code: ${response.statusCode}, error: ${errorJson['error']['message']}",
+            );
+          }
+        },
+      );
+
+      onStreamCreated?.call(responseStream);
+
+      await responseStream?.asFuture();
+      responseStream?.cancel();
+    } else {
+      final Response response = await openAIClient.post(
+        Endpoints.textCompletions,
+        data: params.toMap(),
+        options: getOptions(apiKey),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          "status code: ${response.statusCode}, error: ${response.data}",
         );
-
-        final StreamSubscription? responseStream = response.data?.stream.listen(
-          (event) {
-            final String data = utf8.decode(event);
-
-            if (data.startsWith('data: {')) {
-              final Map dataJson = jsonDecode(data.replaceAll('data: ', ''));
-              responseText += dataJson['choices'][0]['text'].toString();
-              onStreamValue?.call(responseText);
-            }
-          },
-        );
-
-        onStreamCreated?.call(responseStream);
-
-        await responseStream?.asFuture();
-        responseStream?.cancel();
-      } else {
-        final Response response = await openAIClient.post(
-          Endpoints.textCompletions,
-          data: params.toMap(),
-          options: getOptions(apiKey),
-        );
-
-        responseText = response.data['choices'][0]['text'].toString();
       }
 
-      return responseText;
-    } catch (e) {
-      return null;
+      responseText = response.data['choices'][0]['text'].toString();
     }
+
+    return responseText;
   }
 }

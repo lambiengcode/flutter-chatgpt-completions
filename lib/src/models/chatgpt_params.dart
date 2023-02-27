@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:chatgpt_completions/src/constants/constants.dart';
 import 'package:chatgpt_completions/src/models/gpt_model.dart';
 
 class TextCompletionsParams {
@@ -11,13 +10,15 @@ class TextCompletionsParams {
   final double topP;
   final int n;
   final bool stream;
+  final int maxTokens;
   TextCompletionsParams({
     required this.prompt,
     required this.model,
-    required this.temperature,
-    required this.topP,
-    required this.n,
-    required this.stream,
+    this.temperature = 0.9,
+    this.topP = 1,
+    this.n = 1,
+    this.stream = true,
+    this.maxTokens = 2048,
   });
 
   TextCompletionsParams copyWith({
@@ -27,6 +28,7 @@ class TextCompletionsParams {
     double? topP,
     int? n,
     bool? stream,
+    int? maxTokens,
   }) {
     return TextCompletionsParams(
       prompt: prompt ?? this.prompt,
@@ -35,6 +37,7 @@ class TextCompletionsParams {
       topP: topP ?? this.topP,
       n: n ?? this.n,
       stream: stream ?? this.stream,
+      maxTokens: maxTokens ?? this.maxTokens,
     );
   }
 
@@ -42,7 +45,7 @@ class TextCompletionsParams {
     return <String, dynamic>{
       'prompt': prompt,
       'model': model.model,
-      "max_tokens": model.maxTokens - prompt.length ~/ charactersPerToken,
+      "max_tokens": maxTokens,
       'temperature': temperature,
       'top_p': topP,
       'n': n,
