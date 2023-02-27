@@ -15,6 +15,8 @@ Dart client for the unofficial ChatGPT API. Support Text Completeion and stream 
 
 ## Features
 
+<img src="https://github.com/lambiengcode/chatgpt_completions/blob/main/screenshots/RPReplay_Final1677469870.gif?raw=true" />
+
 * Text completions without stream response
 * Text completions with stream response
 
