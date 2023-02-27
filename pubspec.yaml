@@ -1,7 +1,8 @@
 name: chatgpt_completions
 description: Dart client for the unofficial ChatGPT API. Support Text Completeion and stream response from v1/completions.
 version: 0.0.1
-homepage:
+homepage: https://github.com/lambiengcode
+repository: https://github.com/lambiengcode/chatgpt_completions
 
 environment:
   sdk: ">=2.19.2 <3.0.0"
