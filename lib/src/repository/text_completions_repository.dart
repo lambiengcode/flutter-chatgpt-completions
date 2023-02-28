@@ -60,14 +60,17 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
           final String data = utf8.decode(event);
 
           if (data.startsWith('data: {')) {
-            final Map dataJson = jsonDecode(data.replaceAll('data: ', ''));
+            final Map dataJson = jsonDecode(data.replaceAll('data: {', '{'));
             responseText += dataJson['choices'][0]['text'].toString();
             onStreamValue?.call(responseText);
           } else if (!data.startsWith('data:')) {
             final Map errorJson = jsonDecode(data);
-            throw Exception(
-              "status code: ${response.statusCode}, error: ${errorJson['error']['message']}",
-            );
+
+            if (errorJson['error'] != null) {
+              throw Exception(
+                "status code: ${response.statusCode}, error: ${errorJson['error']['message']}",
+              );
+            }
           }
         },
       );

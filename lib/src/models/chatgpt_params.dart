@@ -50,6 +50,7 @@ class TextCompletionsParams {
       'top_p': topP,
       'n': n,
       'stream': stream,
+      'logprobs': null,
     };
   }
 
