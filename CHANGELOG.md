@@ -1,3 +1,7 @@
+## 0.0.3
+
+* Fix decode response in onStreamValue
+
 ## 0.0.2
 
 * Add maxTokens in TextCompletionsParams
