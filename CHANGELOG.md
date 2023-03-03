@@ -1,3 +1,8 @@
+## 0.0.4
+
+* Support new gpt model: **gpt-3.5-turbo**
+* Fix decoder response related to issue [#1](https://github.com/lambiengcode/chatgpt_completions/issues/1)
+
 ## 0.0.3
 
 * Fix decode response in onStreamValue
