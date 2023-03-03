@@ -1,4 +1,5 @@
 enum GPTModel {
+  gpt3p5turbo("gpt-3.5-turbo", 4000),
   davinci("text-davinci-003", 4000),
   curie("text-curie-001", 2048),
   babbage("text-babbage-001", 2048),

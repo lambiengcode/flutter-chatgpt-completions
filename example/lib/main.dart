@@ -49,4 +49,27 @@ void main() async {
 
   // Stop generating
   responseSubscription?.cancel();
+
+  // Using GPT-3.5-Turbo
+  await ChatGPTCompletions.instance.textCompletions(
+    TextCompletionsParams(
+      // prompt: "What's Flutter?",
+      messagesTurbo: [
+        MessageTurbo(
+          role: TurboRole.user,
+          content: "What's Flutter?",
+        ),
+      ],
+      model: GPTModel.gpt3p5turbo,
+    ),
+    onStreamValue: (characters) {
+      responseWithStream += characters;
+      print(responseWithStream);
+    },
+    onStreamCreated: (subscription) {
+      responseSubscription = subscription;
+    },
+    // Debounce 100ms for receive next value
+    debounce: const Duration(milliseconds: 100),
+  );
 }

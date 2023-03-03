@@ -2,23 +2,26 @@
 import 'dart:convert';
 
 import 'package:chatgpt_completions/src/models/gpt_model.dart';
+import 'package:chatgpt_completions/src/models/message_turbo.dart';
 
 class TextCompletionsParams {
-  final String prompt;
+  final String? prompt;
   final GPTModel model;
   final double temperature;
   final double topP;
   final int n;
   final bool stream;
   final int maxTokens;
+  final List<MessageTurbo> messagesTurbo;
   TextCompletionsParams({
-    required this.prompt,
     required this.model,
     this.temperature = 0.9,
     this.topP = 1,
     this.n = 1,
     this.stream = true,
     this.maxTokens = 2048,
+    this.messagesTurbo = const [],
+    this.prompt,
   });
 
   TextCompletionsParams copyWith({
@@ -50,7 +53,18 @@ class TextCompletionsParams {
       'top_p': topP,
       'n': n,
       'stream': stream,
-      'logprobs': null,
+    };
+  }
+
+  Map<String, dynamic> toMapTurbo() {
+    return <String, dynamic>{
+      'messages': messagesTurbo.map((e) => e.toMap()).toList(),
+      'model': model.model,
+      "max_tokens": maxTokens,
+      'temperature': temperature,
+      'top_p': topP,
+      'n': n,
+      'stream': stream,
     };
   }
 
@@ -82,4 +96,8 @@ class TextCompletionsParams {
         n.hashCode ^
         stream.hashCode;
   }
+}
+
+extension TextCompletionsParamsX on TextCompletionsParams {
+  bool get isTurbo => model == GPTModel.gpt3p5turbo;
 }

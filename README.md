@@ -85,6 +85,33 @@ await ChatGPTCompletions.instance.textCompletions(
 responseSubscription?.cancel();
 ```
 
+- Using model gpt-3.5-turbo
+
+```dart
+// Using GPT-3.5-Turbo
+await ChatGPTCompletions.instance.textCompletions(
+  TextCompletionsParams(
+    // using messagesTurbo insteal of prompt
+    messagesTurbo: [
+      MessageTurbo(
+        role: TurboRole.user,
+        content: "What's Flutter?",
+      ),
+    ],
+    model: GPTModel.gpt3p5turbo, // --> switch to gpt-3.5-turbo model
+  ),
+  onStreamValue: (characters) {
+    responseWithStream += characters;
+    print(responseWithStream);
+  },
+  onStreamCreated: (subscription) {
+    responseSubscription = subscription;
+  },
+  // Debounce 100ms for receive next value
+  debounce: const Duration(milliseconds: 100),
+);
+```
+
 
 ## License - lambiengcode
 

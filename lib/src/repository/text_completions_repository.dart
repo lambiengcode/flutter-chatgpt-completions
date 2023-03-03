@@ -13,6 +13,7 @@ import 'package:rxdart/rxdart.dart';
 
 class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
   final String matchResultString = '"text":';
+  final String matchResultTurboString = '"content":';
   final Dio _openAIClient = Dio(
     BaseOptions(
       baseUrl: Endpoints.openAIBaseUrl,
@@ -54,8 +55,10 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
 
     if (params.stream) {
       final Response<ResponseBody> response = await _openAIClient.post(
-        Endpoints.textCompletions,
-        data: params.toMap(),
+        params.isTurbo
+            ? Endpoints.textCompletionsTurbo
+            : Endpoints.textCompletions,
+        data: params.isTurbo ? params.toMapTurbo() : params.toMap(),
         options: _getOptions(apiKey, responseType: ResponseType.stream),
       );
 
@@ -65,42 +68,16 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
           .doOnData((event) {})
           .listen(
         (bodyBytes) {
-          final String data = utf8.decode(bodyBytes, allowMalformed: false);
-          if (data.contains(matchResultString)) {
-            final List<String> dataSplit = data.split("[{");
-
-            final int indexOfResult = dataSplit.indexWhere(
-              (element) => element.contains(matchResultString),
-            );
-
-            final List<String> textSplit =
-                indexOfResult == -1 ? [] : dataSplit[indexOfResult].split(",");
-
-            final indexOfText = textSplit.indexWhere(
-              (element) => element.contains(matchResultString),
-            );
-
-            if (indexOfText != -1) {
-              try {
-                final Map dataJson = jsonDecode('{${textSplit[indexOfText]}}');
-                responseText += dataJson['text'].toString();
-                onStreamValue?.call(responseText);
-              } on Exception catch (_, __) {
-                return;
-              }
-            }
+          if (params.isTurbo) {
+            _handleListenBodyBytesTurbo(bodyBytes, response, (p0) {
+              responseText += p0;
+              onStreamValue?.call(responseText);
+            });
           } else {
-            Map errorJson = {};
-            try {
-              errorJson = jsonDecode(data);
-              // ignore: empty_catches
-            } catch (error) {}
-
-            if (errorJson['error'] != null) {
-              throw Exception(
-                "status code: ${response.statusCode}, error: ${errorJson['error']['message']}",
-              );
-            }
+            _handleListenBodyBytes(bodyBytes, response, (p0) {
+              responseText += p0;
+              onStreamValue?.call(responseText);
+            });
           }
         },
       );
@@ -111,8 +88,10 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
       responseStream?.cancel();
     } else {
       final Response response = await _openAIClient.post(
-        Endpoints.textCompletions,
-        data: params.toMap(),
+        params.isTurbo
+            ? Endpoints.textCompletionsTurbo
+            : Endpoints.textCompletions,
+        data: params.isTurbo ? params.toMapTurbo() : params.toMap(),
         options: _getOptions(apiKey),
       );
 
@@ -122,9 +101,97 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
         );
       }
 
-      responseText = response.data['choices'][0]['text'].toString();
+      responseText = (response.data['choices'][0]['message']['content'] ?? '')
+          .toString()
+          .trim();
     }
 
     return responseText;
+  }
+
+  void _handleListenBodyBytes(
+    Uint8List bodyBytes,
+    Response response,
+    Function(String) handleNewValue,
+  ) {
+    final String data = utf8.decode(bodyBytes, allowMalformed: false);
+    if (data.contains(matchResultString)) {
+      final List<String> dataSplit = data.split("[{");
+
+      final int indexOfResult = dataSplit.indexWhere(
+        (element) => element.contains(matchResultString),
+      );
+
+      final List<String> textSplit =
+          indexOfResult == -1 ? [] : dataSplit[indexOfResult].split(",");
+
+      final indexOfText = textSplit.indexWhere(
+        (element) => element.contains(matchResultString),
+      );
+
+      if (indexOfText != -1) {
+        try {
+          final Map dataJson = jsonDecode('{${textSplit[indexOfText]}}');
+          handleNewValue(dataJson['text'].toString());
+        } on Exception catch (_, __) {
+          return;
+        }
+      }
+    } else {
+      Map errorJson = {};
+      try {
+        errorJson = jsonDecode(data);
+        // ignore: empty_catches
+      } catch (error) {}
+
+      if (errorJson['error'] != null) {
+        throw Exception(
+          "status code: ${response.statusCode}, error: ${errorJson['error']['message']}",
+        );
+      }
+    }
+  }
+
+  void _handleListenBodyBytesTurbo(
+    Uint8List bodyBytes,
+    Response response,
+    Function(String) handleNewValue,
+  ) {
+    final String data = utf8.decode(bodyBytes, allowMalformed: false);
+    if (data.contains(matchResultTurboString)) {
+      final List<String> dataSplit = data.split("[{");
+
+      final int indexOfResult = dataSplit.indexWhere(
+        (element) => element.contains(matchResultTurboString),
+      );
+
+      final List<String> textSplit =
+          indexOfResult == -1 ? [] : dataSplit[indexOfResult].split(",");
+
+      final indexOfText = textSplit.indexWhere(
+        (element) => element.contains(matchResultTurboString),
+      );
+
+      if (indexOfText != -1) {
+        try {
+          final Map dataJson = jsonDecode('{${textSplit[indexOfText]}}');
+          handleNewValue(dataJson['delta']['content'].toString());
+        } on Exception catch (_, __) {
+          return;
+        }
+      }
+    } else {
+      Map errorJson = {};
+      try {
+        errorJson = jsonDecode(data);
+        // ignore: empty_catches
+      } catch (error) {}
+
+      if (errorJson['error'] != null) {
+        throw Exception(
+          "status code: ${response.statusCode}, error: ${errorJson['error']['message']}",
+        );
+      }
+    }
   }
 }

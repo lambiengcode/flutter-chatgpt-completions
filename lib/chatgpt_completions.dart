@@ -7,6 +7,8 @@ import 'package:chatgpt_completions/src/repository/text_completions_repository.d
 
 export './src/models/chatgpt_params.dart';
 export './src/models/gpt_model.dart';
+export './src/models/turbo_role.dart';
+export './src/models/message_turbo.dart';
 
 class ChatGPTCompletions {
   // MARK: variables
