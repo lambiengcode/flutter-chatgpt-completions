@@ -20,12 +20,15 @@ class ChatGPTCompletions {
     TextCompletionsParams params, {
     Function(String p1)? onStreamValue,
     Function(StreamSubscription? p1)? onStreamCreated,
+    Duration debounce = Duration.zero,
+    String? forceKey,
   }) async {
     return await TextCompletionsRepository().textCompletions(
-      _apiKey,
+      forceKey ?? _apiKey,
       params,
       onStreamValue: onStreamValue,
       onStreamCreated: onStreamCreated,
+      debounce: debounce,
     );
   }
 

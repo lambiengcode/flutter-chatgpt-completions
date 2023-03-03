@@ -43,6 +43,8 @@ void main() async {
     onStreamCreated: (subscription) {
       responseSubscription = subscription;
     },
+    // Debounce 200ms for receive next value
+    debounce: const Duration(milliseconds: 200),
   );
 
   // Stop generating

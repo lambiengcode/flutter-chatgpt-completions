@@ -1,6 +1,7 @@
 // Dart imports:
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 // Package imports:
 import 'package:chatgpt_completions/src/constants/constants.dart';
@@ -8,9 +9,11 @@ import 'package:chatgpt_completions/src/constants/endpoints.dart';
 import 'package:chatgpt_completions/src/models/chatgpt_params.dart';
 import 'package:chatgpt_completions/src/repository/text_completions_repository_interface.dart';
 import 'package:dio/dio.dart';
+import 'package:rxdart/rxdart.dart';
 
 class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
-  static Dio openAIClient = Dio(
+  final String matchResultString = '"text":';
+  final Dio _openAIClient = Dio(
     BaseOptions(
       baseUrl: Endpoints.openAIBaseUrl,
       connectTimeout: const Duration(milliseconds: connectTimeOut),
@@ -19,7 +22,7 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
     ),
   );
 
-  getHeaders(String apiKey) {
+  Map<String, String> _getHeaders(String apiKey) {
     return {
       'Authorization': 'Bearer $apiKey',
       'Content-Type': 'application/json; charset=UTF-8',
@@ -29,12 +32,12 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
     };
   }
 
-  Options getOptions(String apiKey, {ResponseType? responseType}) {
+  Options _getOptions(String apiKey, {ResponseType? responseType}) {
     return Options(
       validateStatus: (status) {
         return true;
       },
-      headers: getHeaders(apiKey),
+      headers: _getHeaders(apiKey),
       responseType: responseType,
     );
   }
@@ -45,26 +48,53 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
     TextCompletionsParams params, {
     Function(String p1)? onStreamValue,
     Function(StreamSubscription? p1)? onStreamCreated,
+    Duration debounce = Duration.zero,
   }) async {
     String responseText = '';
 
     if (params.stream) {
-      final Response<ResponseBody> response = await openAIClient.post(
+      final Response<ResponseBody> response = await _openAIClient.post(
         Endpoints.textCompletions,
         data: params.toMap(),
-        options: getOptions(apiKey, responseType: ResponseType.stream),
+        options: _getOptions(apiKey, responseType: ResponseType.stream),
       );
 
-      final StreamSubscription? responseStream = response.data?.stream.listen(
-        (event) {
-          final String data = utf8.decode(event);
+      final StreamSubscription<Uint8List>? responseStream = response
+          .data?.stream
+          .asyncExpand((event) => Rx.timer(event, debounce))
+          .doOnData((event) {})
+          .listen(
+        (bodyBytes) {
+          final String data = utf8.decode(bodyBytes, allowMalformed: false);
+          if (data.contains(matchResultString)) {
+            final List<String> dataSplit = data.split("[{");
 
-          if (data.startsWith('data: {')) {
-            final Map dataJson = jsonDecode(data.replaceAll('data: {', '{'));
-            responseText += dataJson['choices'][0]['text'].toString();
-            onStreamValue?.call(responseText);
-          } else if (!data.startsWith('data:')) {
-            final Map errorJson = jsonDecode(data);
+            final int indexOfResult = dataSplit.indexWhere(
+              (element) => element.contains(matchResultString),
+            );
+
+            final List<String> textSplit =
+                indexOfResult == -1 ? [] : dataSplit[indexOfResult].split(",");
+
+            final indexOfText = textSplit.indexWhere(
+              (element) => element.contains(matchResultString),
+            );
+
+            if (indexOfText != -1) {
+              try {
+                final Map dataJson = jsonDecode('{${textSplit[indexOfText]}}');
+                responseText += dataJson['text'].toString();
+                onStreamValue?.call(responseText);
+              } on Exception catch (_, __) {
+                return;
+              }
+            }
+          } else {
+            Map errorJson = {};
+            try {
+              errorJson = jsonDecode(data);
+              // ignore: empty_catches
+            } catch (error) {}
 
             if (errorJson['error'] != null) {
               throw Exception(
@@ -80,10 +110,10 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
       await responseStream?.asFuture();
       responseStream?.cancel();
     } else {
-      final Response response = await openAIClient.post(
+      final Response response = await _openAIClient.post(
         Endpoints.textCompletions,
         data: params.toMap(),
-        options: getOptions(apiKey),
+        options: _getOptions(apiKey),
       );
 
       if (response.statusCode != 200) {

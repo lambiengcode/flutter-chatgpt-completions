@@ -8,6 +8,7 @@ abstract class TextCompletionsRepositoryInterface {
     TextCompletionsParams params, {
     Function(String)? onStreamValue,
     Function(StreamSubscription?)? onStreamCreated,
+    Duration debounce = Duration.zero,
   }) async {
     throw UnimplementedError("textCompletions() has not been implemented.");
   }
