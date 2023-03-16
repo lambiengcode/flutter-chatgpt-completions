@@ -101,11 +101,16 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
         );
       }
 
-      responseText = (response.data['choices'][0]['message']['content'] ?? '')
-          .toString()
-          .trim();
+      if (params.isTurbo) {
+        responseText =
+            (response.data['choices'][0]?['message']?['content'] ?? '')
+                .toString()
+                .trim();
+      } else {
+        responseText =
+            (response.data['choices'][0]?['text'] ?? '').toString().trim();
+      }
     }
-
     return responseText;
   }
 
