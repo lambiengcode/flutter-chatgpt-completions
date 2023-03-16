@@ -1,3 +1,9 @@
+## 0.0.5
+
+* Allow put force api key in each function execute
+* Support debounce duration when stream response
+* Fix response of ChatGPT(text-davinci-003)
+
 ## 0.0.4
 
 * Support new gpt model: **gpt-3.5-turbo**
