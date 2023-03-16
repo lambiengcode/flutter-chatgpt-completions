@@ -11,6 +11,10 @@ and the Flutter guide for
 [developing packages and plugins](https://flutter.dev/developing-packages).
 -->
 
+[![server](https://img.shields.io/badge/chatgpt-server--stream--event-blue)](https://pub.dev/packages/chatgpt_completions)[![Pub](https://img.shields.io/pub/publisher/chatgpt_completions)](https://pub.dev/packages/chatgpt_completions)[![files](https://img.shields.io/github/directory-file-count/lambiengcode/chatgpt_completions)](https://github.com/lambiengcode/chatgpt_completions)[![License](https://img.shields.io/github/license/lambiengcode/chatgpt_completions)](https://github.com/lambiengcode/chatgpt_completions
+)[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat&logo=github)](https://github.com/lambiengcode/chatgpt_completions
+)
+
 Dart client for the unofficial ChatGPT API. Support Text Completeion and stream response from v1/completions.
 
 ## Features
