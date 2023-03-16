@@ -3,6 +3,7 @@ description: Dart client for the unofficial ChatGPT API. Support Text Completion
 version: 0.0.5
 homepage: https://github.com/lambiengcode
 repository: https://github.com/lambiengcode/chatgpt_completions
+issue_tracker: https://github.com/lambiengcode/chatgpt_completions/issues
 
 environment:
   sdk: ">=2.19.2 <3.0.0"
