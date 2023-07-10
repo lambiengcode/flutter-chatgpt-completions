@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
 
   rxdart: ^0.27.7
-  dio: ^5.0.2
+  dio: ^5.2.1+1
 
 dev_dependencies:
   flutter_test:

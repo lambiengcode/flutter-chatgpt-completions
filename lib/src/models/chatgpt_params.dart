@@ -99,5 +99,5 @@ class TextCompletionsParams {
 }
 
 extension TextCompletionsParamsX on TextCompletionsParams {
-  bool get isTurbo => model == GPTModel.gpt3p5turbo;
+  bool get isChatCompletion => model.isChatCompletion;
 }

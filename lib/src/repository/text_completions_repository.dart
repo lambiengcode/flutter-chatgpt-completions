@@ -55,10 +55,10 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
 
     if (params.stream) {
       final Response<ResponseBody> response = await _openAIClient.post(
-        params.isTurbo
+        params.isChatCompletion
             ? Endpoints.textCompletionsTurbo
             : Endpoints.textCompletions,
-        data: params.isTurbo ? params.toMapTurbo() : params.toMap(),
+        data: params.isChatCompletion ? params.toMapTurbo() : params.toMap(),
         options: _getOptions(apiKey, responseType: ResponseType.stream),
       );
 
@@ -68,7 +68,7 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
           .doOnData((event) {})
           .listen(
         (bodyBytes) {
-          if (params.isTurbo) {
+          if (params.isChatCompletion) {
             _handleListenBodyBytesTurbo(bodyBytes, response, (p0) {
               responseText += p0;
               onStreamValue?.call(responseText);
@@ -88,10 +88,10 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
       responseStream?.cancel();
     } else {
       final Response response = await _openAIClient.post(
-        params.isTurbo
+        params.isChatCompletion
             ? Endpoints.textCompletionsTurbo
             : Endpoints.textCompletions,
-        data: params.isTurbo ? params.toMapTurbo() : params.toMap(),
+        data: params.isChatCompletion ? params.toMapTurbo() : params.toMap(),
         options: _getOptions(apiKey),
       );
 
@@ -101,7 +101,7 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
         );
       }
 
-      if (params.isTurbo) {
+      if (params.isChatCompletion) {
         responseText =
             (response.data['choices'][0]?['message']?['content'] ?? '')
                 .toString()
@@ -162,26 +162,25 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
     Response response,
     Function(String) handleNewValue,
   ) {
-    final String data = utf8.decode(bodyBytes, allowMalformed: false);
+    late final String data;
+    try {
+      data = utf8.decode(bodyBytes, allowMalformed: false);
+    } catch (_) {
+      return;
+    }
+
     if (data.contains(matchResultTurboString)) {
-      final List<String> dataSplit = data.split("[{");
+      final List<String> jsonStrings = data.split('data: ');
 
-      final int indexOfResult = dataSplit.indexWhere(
-        (element) => element.contains(matchResultTurboString),
-      );
+      for (final jsonString in jsonStrings) {
+        if (jsonString.isEmpty) continue;
 
-      final List<String> textSplit =
-          indexOfResult == -1 ? [] : dataSplit[indexOfResult].split(",");
-
-      final indexOfText = textSplit.indexWhere(
-        (element) => element.contains(matchResultTurboString),
-      );
-
-      if (indexOfText != -1) {
         try {
-          final Map dataJson = jsonDecode('{${textSplit[indexOfText]}}');
-          handleNewValue(dataJson['delta']['content'].toString());
-        } on Exception catch (_, __) {
+          final dataJson = jsonDecode(jsonString);
+          handleNewValue(
+            dataJson?['choices']?[0]?['delta']?['content']?.toString() ?? '',
+          );
+        } catch (_) {
           return;
         }
       }

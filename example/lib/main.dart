@@ -6,7 +6,7 @@ import 'package:chatgpt_completions/chatgpt_completions.dart';
 
 void main() async {
   /// Generate api key from openai console: https://platform.openai.com/account/api-keys
-  ChatGPTCompletions.instance.initialize(apiKey: 'openai_api_key');
+  ChatGPTCompletions.instance.initialize(apiKey: '<openai_api_key>');
 
   print("Generating answer without stream...");
 
@@ -15,7 +15,7 @@ void main() async {
       await ChatGPTCompletions.instance.textCompletions(TextCompletionsParams(
     prompt: "What's Flutter?",
     model: GPTModel.davinci,
-    stream: false,
+    stream: true,
   ));
 
   print("OpenAI: $responseWithoutStream");
@@ -50,21 +50,21 @@ void main() async {
   // Stop generating
   responseSubscription?.cancel();
 
-  // Using GPT-3.5-Turbo
+  // Using Chat Completion API: GPT-3.5-Turbo, GPT-4,...
   await ChatGPTCompletions.instance.textCompletions(
     TextCompletionsParams(
       // prompt: "What's Flutter?",
       messagesTurbo: [
         MessageTurbo(
           role: TurboRole.user,
-          content: "What's Flutter?",
+          content: "Where is the tallest building in the world?",
         ),
       ],
       model: GPTModel.gpt3p5turbo,
     ),
     onStreamValue: (characters) {
       responseWithStream += characters;
-      print(responseWithStream);
+      print(characters);
     },
     onStreamCreated: (subscription) {
       responseSubscription = subscription;
