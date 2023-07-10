@@ -1,3 +1,8 @@
+## 1.0.0
+
+* [Feat] Support new gpt model: **gpt-4**, **gpt-4-0613**, **gpt-4-32k**, **gpt-4-32k-0613** 
+* [Fix] Decode bytes when stream response chat completions api
+
 ## 0.0.5
 
 * Allow put force api key in each function execute
