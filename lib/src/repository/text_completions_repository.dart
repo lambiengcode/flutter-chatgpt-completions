@@ -188,7 +188,7 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
           );
         } catch (_) {
           log("-> 🐛 Throw: ${_.toString()}");
-          handleNewValue(tryDecodeTurboBytesPayload(data));
+          handleNewValue(_getContentFromJson(data));
         }
       }
     } else {
@@ -206,28 +206,13 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
     }
   }
 
-  String tryDecodeTurboBytesPayload(String data) {
-    final List<String> dataSplit = data.split("[{");
+  // Attempt to get value in json format error
+  String _getContentFromJson(String jsonString) {
+    RegExp regex = RegExp(r'"content"\s*:\s*"([^"]+)"');
+    Match? match = regex.firstMatch(jsonString);
 
-    final int indexOfResult = dataSplit.indexWhere(
-      (element) => element.contains(matchResultString),
-    );
-
-    final List<String> textSplit =
-        indexOfResult == -1 ? [] : dataSplit[indexOfResult].split(",");
-
-    final indexOfText = textSplit.indexWhere(
-      (element) => element.contains(matchResultString),
-    );
-
-    if (indexOfText != -1) {
-      try {
-        final Map dataJson = jsonDecode('{${textSplit[indexOfText]}}');
-        return dataJson['text'].toString();
-      } on Exception catch (_, __) {
-        log("-> 🐛 Throw: ${_.toString()}");
-        return " ";
-      }
+    if (match != null && match.groupCount > 0) {
+      return match.group(1) ?? ' ';
     }
 
     return " ";
