@@ -2,12 +2,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:developer';
 
 // Package imports:
 import 'package:chatgpt_completions/src/constants/constants.dart';
 import 'package:chatgpt_completions/src/constants/endpoints.dart';
 import 'package:chatgpt_completions/src/models/chatgpt_params.dart';
 import 'package:chatgpt_completions/src/repository/text_completions_repository_interface.dart';
+import 'package:chatgpt_completions/src/services/decoder_queue.dart';
 import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -62,23 +64,27 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
         options: _getOptions(apiKey, responseType: ResponseType.stream),
       );
 
+      DecoderQueueService.instance.initialize();
+
       final StreamSubscription<Uint8List>? responseStream = response
           .data?.stream
           .asyncExpand((event) => Rx.timer(event, debounce))
           .doOnData((event) {})
           .listen(
         (bodyBytes) {
-          if (params.isChatCompletion) {
-            _handleListenBodyBytesTurbo(bodyBytes, response, (p0) {
-              responseText += p0;
-              onStreamValue?.call(responseText);
-            });
-          } else {
-            _handleListenBodyBytes(bodyBytes, response, (p0) {
-              responseText += p0;
-              onStreamValue?.call(responseText);
-            });
-          }
+          DecoderQueueService.instance.addQueue(() {
+            if (params.isChatCompletion) {
+              _handleListenBodyBytesTurbo(bodyBytes, response, (p0) {
+                responseText += p0;
+                onStreamValue?.call(responseText);
+              });
+            } else {
+              _handleListenBodyBytes(bodyBytes, response, (p0) {
+                responseText += p0;
+                onStreamValue?.call(responseText);
+              });
+            }
+          });
         },
       );
 
@@ -181,7 +187,8 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
             dataJson?['choices']?[0]?['delta']?['content']?.toString() ?? '',
           );
         } catch (_) {
-          return;
+          log("-> 🐛 Throw: ${_.toString()}");
+          handleNewValue(tryDecodeTurboBytesPayload(data));
         }
       }
     } else {
@@ -197,5 +204,32 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
         );
       }
     }
+  }
+
+  String tryDecodeTurboBytesPayload(String data) {
+    final List<String> dataSplit = data.split("[{");
+
+    final int indexOfResult = dataSplit.indexWhere(
+      (element) => element.contains(matchResultString),
+    );
+
+    final List<String> textSplit =
+        indexOfResult == -1 ? [] : dataSplit[indexOfResult].split(",");
+
+    final indexOfText = textSplit.indexWhere(
+      (element) => element.contains(matchResultString),
+    );
+
+    if (indexOfText != -1) {
+      try {
+        final Map dataJson = jsonDecode('{${textSplit[indexOfText]}}');
+        return dataJson['text'].toString();
+      } on Exception catch (_, __) {
+        log("-> 🐛 Throw: ${_.toString()}");
+        return " ";
+      }
+    }
+
+    return " ";
   }
 }
