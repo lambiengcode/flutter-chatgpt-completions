@@ -1,3 +1,7 @@
+## 1.0.1
+
+* [Feat] Add Decoder Queue when listen response from Chat Completions API for ensure decode response payload in order.
+
 ## 1.0.0
 
 * [Feat] Support new gpt model: **gpt-4**, **gpt-4-0613**, **gpt-4-32k**, **gpt-4-32k-0613** 
