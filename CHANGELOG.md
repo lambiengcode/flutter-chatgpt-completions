@@ -1,3 +1,7 @@
+## 1.0.1+1
+
+* [Fix] add function _getContentFromJson using regexp to attempt to get value in json format error
+
 ## 1.0.1
 
 * [Feat] Add Decoder Queue when listen response from Chat Completions API for ensure decode response payload in order.

@@ -89,7 +89,7 @@ await ChatGPTCompletions.instance.textCompletions(
 responseSubscription?.cancel();
 ```
 
-- Using model gpt-3.5-turbo
+- Using model gpt-3.5-turbo/gpt-4
 
 ```dart
 // Using GPT-3.5-Turbo
@@ -122,7 +122,7 @@ await ChatGPTCompletions.instance.textCompletions(
 ```terminal
 MIT License
 
-Copyright (c) 2022 Askany
+Copyright (c) 2023 lambiengcode
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
