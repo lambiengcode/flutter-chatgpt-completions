@@ -1,4 +1,4 @@
-## 1.0.1+1
+## 1.0.2
 
 * [Fix] add function _getContentFromJson using regexp to attempt to get value in json format error
 
