@@ -188,7 +188,6 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
           );
         } catch (_) {
           log("-> 🐛 Throw: ${_.toString()}");
-          handleNewValue(_getContentFromJson(data));
         }
       }
     } else {
@@ -204,17 +203,5 @@ class TextCompletionsRepository extends TextCompletionsRepositoryInterface {
         );
       }
     }
-  }
-
-  // Attempt to get value in json format error
-  String _getContentFromJson(String jsonString) {
-    RegExp regex = RegExp(r'"content"\s*:\s*"([^"]+)"');
-    Match? match = regex.firstMatch(jsonString);
-
-    if (match != null && match.groupCount > 0) {
-      return match.group(1) ?? ' ';
-    }
-
-    return " ";
   }
 }
