@@ -1,5 +1,6 @@
 enum GPTModel {
   gpt4("gpt-4", 8192, isChatCompletion: true),
+  gpt4turbo("gpt-4-turbo-2024-04-09", 128000, isChatCompletion: true),
   gpt4v0613("gpt-4-0613", 8192, isChatCompletion: true),
   gpt4p32k("gpt-4-32k", 32768, isChatCompletion: true),
   gpt4p32kv0613("gpt-4-32k-0613", 32768, isChatCompletion: true),
