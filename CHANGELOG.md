@@ -1,3 +1,7 @@
+## 1.0.4
+
+* [Fix] Add gpt 4 turbo. Thanks @chopper985
+
 ## 1.0.3
 
 * [Fix] Duplicate body response. Thanks @chopper985
