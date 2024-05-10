@@ -1,11 +1,11 @@
 // This is a generated file; do not edit or check into version control.
 FLUTTER_ROOT=/Applications/flutter
-FLUTTER_APPLICATION_PATH=/Users/lambiengcode/Documents/chatgpt_completions
+FLUTTER_APPLICATION_PATH=/Users/lambiengcode/Documents/flutter-chatgpt-completions
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build
-FLUTTER_BUILD_NAME=0.0.5
-FLUTTER_BUILD_NUMBER=0.0.5
+FLUTTER_BUILD_NAME=1.0.4
+FLUTTER_BUILD_NUMBER=1.0.4
 EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386
 EXCLUDED_ARCHS[sdk=iphoneos*]=armv7
 DART_OBFUSCATION=false
