@@ -1,3 +1,7 @@
+## 1.0.3
+
+* [Fix] Duplicate body response. Thanks @chopper985
+
 ## 1.0.2
 
 * [Fix] add function _getContentFromJson using regexp to attempt to get value in json format error
