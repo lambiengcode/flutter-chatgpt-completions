@@ -6,11 +6,7 @@ enum GPTModel {
   gpt4turbopreview("gpt-4-turbo-preview", 4096, isChatCompletion: true),
   gpt41106preview("gpt-4-1106-preview", 4096, isChatCompletion: true),
   gpt4v0613("gpt-4-0613", 8192, isChatCompletion: true),
-  gpt3p5turbo("gpt-3.5-turbo", 4096, isChatCompletion: true),
-  davinci("text-davinci-003", 4096),
-  curie("text-curie-001", 2048),
-  babbage("text-babbage-001", 2048),
-  ada("text-ada-001", 2048);
+  gpt3p5turbo("gpt-3.5-turbo", 4096, isChatCompletion: true);
 
   /// Returns the [GPTModel] from the given model.
   const GPTModel(this.model, this.maxTokens, {this.isChatCompletion = false});
